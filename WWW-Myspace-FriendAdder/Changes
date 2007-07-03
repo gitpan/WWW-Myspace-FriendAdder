@@ -1,0 +1,10 @@
+Revision history for WWW-Myspace-FriendAdder
+
+0.12    2007-06-29
+        Module split from WWW::Myspace distribution
+        Moved WWW::Myspace::Data from a "use" to a "require" statement to 
+        remove that dependency in WWW::Myspace::FriendAdder
+        Added examples/friend_adder.pl to  with accompanying 
+        examples/adder.cfg file
+        Updated tests so that Myspace login is not required
+

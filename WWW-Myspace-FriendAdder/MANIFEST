@@ -1,0 +1,16 @@
+Changes
+MANIFEST
+META.yml # Will be created by "make dist"
+Makefile.PL
+README
+examples/friend_adder.pl
+examples/adder.cfg
+lib/WWW/Myspace/FriendAdder.pm
+scripts/add_friends
+t/00-load.t
+t/01-friend_adder.t
+t/boilerplate.t
+t/pod-coverage.t
+t/pod.t
+t/friend_adder.cfg
+t/friend_adder.yml
