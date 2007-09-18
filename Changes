@@ -1,5 +1,13 @@
 Revision history for WWW-Myspace-FriendAdder
 
+0.14	2007-09-18
+		Added minimum requirement for WWW::Myspace.pm of 0.71 since Myspace
+		keeps changing the login form.
+		
+0.13    2007-07-03
+        Updated documentation.
+        FriendAdder now exits if "FE" status code is returned by send_friend_request.
+
 0.12    2007-06-29
         Module split from WWW::Myspace distribution
         Moved WWW::Myspace::Data from a "use" to a "require" statement to 

@@ -1,6 +1,7 @@
 package WWW::Myspace::FriendAdder;
 
 use WWW::Myspace::MyBase -Base;
+use WWW::Myspace;
  
 use Carp;
 use Config::General;
@@ -16,15 +17,23 @@ account
 
 =head1 VERSION
 
-Version 0.12
+Version 0.14
 
 =cut
 
-our $VERSION = '0.12';
+our $VERSION = '0.14';
+
+BEGIN {
+    my $require = '0.71';
+    # get a minimum version of Myspace.pm to prevent wonkiness
+    if ( $WWW::Myspace::VERSION < $require ) {
+        croak "we need at least version $require  Yours: $WWW::Myspace::VERSION";
+    }
+}
 
 =head1 WARNING
 
-March 2007: Using WWW::Myspace for commenting, messaging, or adding
+March 2007: Using L<WWW::Myspace> for commenting, messaging, or adding
 friends will probably get your Myspace account deleted or disabled.
 
 =head1 SYNOPSIS
@@ -85,7 +94,7 @@ const default_options => \%default_params;
 =head2 new()
 
 Initialize and return a new WWW::Myspace::FriendAdder object.
-$myspace is a WWW::Myspace object.
+$myspace is a L<WWW::Myspace> object.
 
 Example
 
@@ -143,7 +152,7 @@ look for a config file.  Default file format is L<YAML>.
 =item * C<< config_file_format => [YAML|CFG] >>
 
 If you have chosen to use a configuration file, you may state explicitly
-which format you are using.  You may choose between YAML and
+which format you are using.  You may choose between L<YAML> and
 L<Config::General>.  If you choose not to pass this parameter, it will
 default to L<YAML>.
 
@@ -158,10 +167,10 @@ people who are already on your friends list.  It just makes you look
 like someone who has no clue. So, if you want to get the most out of
 your bandwidth and CPU, set this value to be true.  Currently this info
 is not cached, so your friend ids will have to be looked up every time
-you run the script.  (I'm working on an SQL-related solution right now. 
-Watch for it...)  If you have a lot of friends, keep in mind that this
-will mean some extra time before your script starts trying to add
-friends. Default is off.
+you run the script.  However, if you have successfully called 
+get_data_object() (see below) your friends list will be retrieved via SQL. 
+This is a BIG time saver if you have more than just a few friends.
+
 
 =item * C<< firefox => ["/path/to/firefox/bin +options"] >>
 
@@ -288,11 +297,11 @@ be the upper limit of the random sleep time.  Default is 10.
 This method is the main force behind this module.  Pass it a list of
 friend_ids and it will try to add them to your friends.  This method is
 really just a wrapper around $myspace->send_friend_requests()  It adds
-interactivity and advanced reporting to the WWW::Myspace method.  You'll
+interactivity and advanced reporting to the L<WWW::Myspace> method.  You'll
 get most of the info that you need printed to your terminal when you run
 your script from the command line.  But, the script will also return a
 hash reference which you can use to create your own reports.  The hash
-is keyed on response codes returned by WWW::Myspace.  The value of each
+is keyed on response codes returned by L<WWW::Myspace>.  The value of each
 key is a list of friend ids which returned with that status code.
 
     my $report = $adder->send_friend_requests( @friend_ids );
@@ -687,6 +696,12 @@ sub send_friend_requests {
             $self->_report("reached. Exiting nicely...\n\n");
             last;
         }
+        
+        if ( $status_code eq 'FE' ) {
+            $self->_report("\n\nDaily usage exceeded. Exiting...\n\n");
+            $continue = undef;
+            last;
+        }
 
         # don't sleep if we're just going to print the report
         if ($continue) {
@@ -732,9 +747,9 @@ sub add_to_friends {
     
 }
 
-=head2 is_band {
+=head2 is_band()
 
-If a Data.pm object exists, returns the value of $data->is_band 
+If a L<WWW::Myspace::Data> object exists, returns the value of $data->is_band 
 Otherwise, returns the value of $myspace->is_band
 
 =cut
@@ -775,11 +790,12 @@ sub return_params {
 
 =head2 get_data_object( )
 
-Returns a valid WWW::Myspace::Data object if one can be initialized by
+Returns a valid L<WWW::Myspace::Data> object if one can be initialized by
 the WWW::Myspace::FriendAdder object.  This method will croak if no
 object can be created. This is a handy shortcut if you're using
 WWW::Myspace::Data in conjunction with FriendAdder.pm but don't want  to
-go to the trouble of creating the WWW::Myspace::Data object yourself.
+go to the trouble of creating the L<WWW::Myspace::Data> object yourself.  Just
+remember to install L<WWW::Myspace::Data> first.
 
     my $data = $adder->get_data_object();
     if ( $data ) {
@@ -927,7 +943,7 @@ L<http://search.cpan.org/dist/WWW-Myspace>
 
 =head1 ACKNOWLEDGEMENTS
 
-Many thanks to Grant Grueninger for giving birth to WWW::Myspace and for
+Many thanks to Grant Grueninger for giving birth to L<WWW::Myspace> and for
 his help and advice in the development of this module.  
 
 =head1 COPYRIGHT & LICENSE
