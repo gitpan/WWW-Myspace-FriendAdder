@@ -12,16 +12,16 @@ WriteMakefile(
                                 scripts/add_friends
                               )],
     PREREQ_PM => {
-        'WWW::Myspace'          => 0.67,
+        'WWW::Myspace'          => 0.72,
         'Test::More'            => 0,
-        'Config::General'       => 0, # FriendAdder.pm
-        'DateTime'              => 0, # FriendAdder.pm
-        'IO::Prompt'            => 0, # FriendAdder.pm 
-        'List::Compare'         => 0, # FriendAdder.pm
-        'Math::Round'           => 0, # FriendAdder.pm
-        'Params::Validate'      => 0, # FriendAdder.pm
-        'Scalar::Util'          => 0, # FriendAdder.pm
-
+        'Config::General'       => 0,
+        'DateTime'              => 0,
+        'IO::Prompt'            => 0, 
+        'List::Compare'         => 0,
+        'Math::Round'           => 0,
+        'Params::Validate'      => 0,
+        'Scalar::Util'          => 0,
+        'Term::ProgressBar'     => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'WWW-Myspace-FriendAdder-*' },

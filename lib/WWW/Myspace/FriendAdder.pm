@@ -9,6 +9,7 @@ use Data::Dumper;
 use IO::Prompt;
 use List::Compare;
 use Math::Round qw(nearest);
+use Term::ProgressBar;
 
 =head1 NAME
 
@@ -17,17 +18,17 @@ account
 
 =head1 VERSION
 
-Version 0.14
+Version 0.15
 
 =cut
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 BEGIN {
-    my $require = '0.71';
+    my $require = '0.72';
     # get a minimum version of Myspace.pm to prevent wonkiness
     if ( $WWW::Myspace::VERSION < $require ) {
-        croak "we need at least version $require  Yours: $WWW::Myspace::VERSION";
+        croak "we need at least version $require of WWW::Myspace  Yours: $WWW::Myspace::VERSION";
     }
 }
 
@@ -82,6 +83,7 @@ my %default_params = (
     profile_type        => 0,
     random_sleep        => { default => 0 },
     sleep               => { default => 10 },
+    sleep_on_captcha    => { default => 0 },
     time_zone           => 0,
 );
 
@@ -279,13 +281,22 @@ send_friend_requests() will take random breaks between add requests
 using Perl's built-in rand() function.  The upper limit of the random
 number will be set by the I<sleep> option (see below).  Default is off.
 
-=item * C<< sleep => $value >>
+=item * C<< sleep => $seconds >>
 
 Myspace's network connectivity is wonky at the best of times.  Best not
 to send a request every 0.1 seconds.  Set this to any positive number
 and send_friend_requests() will sleep for this many seconds between add
 requests.  If you enable I<random_sleep> (see above), this number will
 be the upper limit of the random sleep time.  Default is 10.
+
+=item * C<< sleep_on_captcha => $seconds >>
+
+CAPTCHAs will go away if you wait long enough.  If you're running a cron or a 
+background process, you may want to let the script sleep and then check back 
+in.  A suggested time would be just over 12 hours or something greater than
+33,200 seconds.  You should note that this *will* kick in *before* the firefox 
+param is checked, so if you're not sure you'd like to wait several hours when 
+you hit CAPTCHA, this is not for you. Default is off.  
 
 =back
 
@@ -582,6 +593,35 @@ sub send_friend_requests {
                 $self->_report("message_on_captcha attempt...\n");
 
             }
+            
+            if ( $status_code eq 'FC' && $self->{'sleep_on_captcha'} ) {
+                
+                # sleep for the given number of seconds here
+                if ( $self->{'interactive'} ) {
+                    
+                    $self->_report("sleep_on_captcha attempt...\n"); 
+                    
+                    my $progress = Term::ProgressBar->new({
+                        name  => 'sleep_on_captcha',
+                        count => $self->{'sleep_on_captcha'},
+                        ETA   => 'linear',
+                    });
+
+                    # display progress bar...
+                    foreach ( 1 .. $self->{'sleep_on_captcha'} ) {
+                        sleep 1;
+                        $progress->update( $_ );
+                    }
+                }
+                else {
+                    sleep $self->{'sleep_on_captcha'};
+                }
+                
+                ($status_code, $status) = $self->myspace->add_to_friends($id);
+                ++$adds if ( $status_code eq 'P' );
+                ++$captcha;
+
+            }
 
             if ( $status_code eq 'FC' && $self->{'interactive'} ) {
 
@@ -589,6 +629,7 @@ sub send_friend_requests {
 
                     print 'Please fill out the CAPTCHA response using the ';
                     print 'page that has been opened in your Firefox browser';
+                    print "\n\n";
                     
                     `$self->{'firefox'} "http://collect.myspace.com/index.cfm?fuseaction=invite.addfriend_verify&friendID=$id"`;
                 }
@@ -892,8 +933,8 @@ excellent code of Grant Grueninger
 =head1 BUGS
 
 Please report any bugs or feature requests to
-C<bug-www-myspace at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=WWW-Myspace>.
+C<bug-www-myspace-friendadder at rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=WWW-Myspace-FriendAdder>.
 I will be notified, and then you'll automatically be notified of
 progress on your bug as I make changes.
 
@@ -911,7 +952,8 @@ distribution.
 
 =head1 TO DO
 
-Implement a sleep_on_captcha feature.
+Right now the adder won't deal with FU CAPTCHA pages.  That's fine for my 
+purposes, so if you need that functionality, please open a ticket.
 
 =head1 SUPPORT
 
@@ -925,19 +967,19 @@ You can also look for information at:
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/WWW-Myspace>
+L<http://annocpan.org/dist/WWW-Myspace-FriendAdder>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/WWW-Myspace>
+L<http://cpanratings.perl.org/d/WWW-Myspace-FriendAdder>
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=WWW-Myspace>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=WWW-Myspace-FriendAdder>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/WWW-Myspace>
+L<http://search.cpan.org/dist/WWW-Myspace-FriendAdder>
 
 =back
 
@@ -945,6 +987,10 @@ L<http://search.cpan.org/dist/WWW-Myspace>
 
 Many thanks to Grant Grueninger for giving birth to L<WWW::Myspace> and for
 his help and advice in the development of this module.  
+
+Thanks to Jason A. Ramsey (jason AT eramsey.org) for his contribution of the  
+sleep_on_captcha code:
+L<http://rt.cpan.org/Ticket/Display.html?id=19808>
 
 =head1 COPYRIGHT & LICENSE
 

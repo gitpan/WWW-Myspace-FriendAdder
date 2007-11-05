@@ -1,4 +1,10 @@
-Revision history for WWW-Myspace-FriendAdder
+Revision history for WWW-Myspace-FriendAdder 
+
+0.15    2007-11-04
+        Updated bug reporting links and addresses
+        Updated croak message to include mention of WWW::Myspace module
+        Added minimum requirement of WWW::Myspace.pm version 0.72 to stay current.
+		Added sleep_on_captcha parameter
 
 0.14	2007-09-18
 		Added minimum requirement for WWW::Myspace.pm of 0.71 since Myspace
